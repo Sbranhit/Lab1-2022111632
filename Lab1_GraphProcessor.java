@@ -246,3 +246,4 @@ public class Lab1_GraphProcessor {
 }
 // edit in B1
 // edit in C4
+// edit in B2
