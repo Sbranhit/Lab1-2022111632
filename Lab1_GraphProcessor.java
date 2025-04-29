@@ -25,14 +25,17 @@ public class Lab1_GraphProcessor {
 
         while (true) {
             System.out.println("\nChoose an option:");
-            System.out.println("1. Show Graph\n2. Query Bridge Words\n3. Generate New Text\n4. Shortest Path\n5. PageRank\n6. Random Walk\n0. Exit");
+            System.out.println(
+                    "1. Show Graph\n2. Query Bridge Words\n3. Generate New Text\n4. Shortest Path\n5. PageRank\n6. Random Walk\n0. Exit");
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
                 case 1 -> showDirectedGraph(graph);
                 case 2 -> {
-                    System.out.print("Word1: "); String w1 = scanner.next();
-                    System.out.print("Word2: "); String w2 = scanner.next();
+                    System.out.print("Word1: ");
+                    String w1 = scanner.next();
+                    System.out.print("Word2: ");
+                    String w2 = scanner.next();
                     System.out.println(queryBridgeWords(w1, w2));
                 }
                 case 3 -> {
@@ -41,7 +44,8 @@ public class Lab1_GraphProcessor {
                     System.out.println(generateNewText(line));
                 }
                 case 4 -> {
-                    System.out.print("Input word1 word2 (or only one word to see all paths): "); String w1 = scanner.next();
+                    System.out.print("Input word1 word2 (or only one word to see all paths): ");
+                    String w1 = scanner.next();
                     String line = scanner.nextLine().trim();
                     if (!line.isEmpty()) {
                         String w2 = line;
@@ -71,7 +75,7 @@ public class Lab1_GraphProcessor {
         }
         reader.close();
         for (int i = 0; i < words.size() - 1; i++) {
-            if (!words.get(i).isEmpty() && !words.get(i+1).isEmpty()) {
+            if (!words.get(i).isEmpty() && !words.get(i + 1).isEmpty()) {
                 graph.addEdge(words.get(i), words.get(i + 1));
             }
         }
@@ -103,7 +107,8 @@ public class Lab1_GraphProcessor {
                 }
             }
         }
-        if (bridges.isEmpty()) return "No bridge words from \"" + word1 + "\" to \"" + word2 + "\"!";
+        if (bridges.isEmpty())
+            return "No bridge words from \"" + word1 + "\" to \"" + word2 + "\"!";
         return "The bridge words from \"" + word1 + "\" to \"" + word2 + "\" is: " + String.join(", ", bridges);
     }
 
@@ -116,7 +121,7 @@ public class Lab1_GraphProcessor {
             Set<String> bridges = new HashSet<>();
             if (graph.adj.containsKey(tokens[i])) {
                 for (String mid : graph.adj.get(tokens[i]).keySet()) {
-                    if (graph.adj.containsKey(mid) && graph.adj.get(mid).containsKey(tokens[i+1]))
+                    if (graph.adj.containsKey(mid) && graph.adj.get(mid).containsKey(tokens[i + 1]))
                         bridges.add(mid);
                 }
             }
@@ -131,16 +136,20 @@ public class Lab1_GraphProcessor {
     }
 
     public static String calcShortestPath(String word1, String word2) {
-        if (!graph.nodes.contains(word1) || !graph.nodes.contains(word2)) return "Word not in graph";
+        if (!graph.nodes.contains(word1) || !graph.nodes.contains(word2))
+            return "Word not in graph";
         Map<String, Integer> dist = new HashMap<>();
         Map<String, String> prev = new HashMap<>();
         PriorityQueue<String> pq = new PriorityQueue<>(Comparator.comparingInt(dist::get));
-        for (String node : graph.nodes) dist.put(node, Integer.MAX_VALUE);
-        dist.put(word1, 0); pq.add(word1);
+        for (String node : graph.nodes)
+            dist.put(node, Integer.MAX_VALUE);
+        dist.put(word1, 0);
+        pq.add(word1);
 
         while (!pq.isEmpty()) {
             String u = pq.poll();
-            if (!graph.adj.containsKey(u)) continue;
+            if (!graph.adj.containsKey(u))
+                continue;
             for (Map.Entry<String, Integer> entry : graph.adj.get(u).entrySet()) {
                 String v = entry.getKey();
                 int alt = dist.get(u) + entry.getValue();
@@ -152,23 +161,29 @@ public class Lab1_GraphProcessor {
             }
         }
 
-        if (!dist.containsKey(word2) || dist.get(word2) == Integer.MAX_VALUE) return "No path";
+        if (!dist.containsKey(word2) || dist.get(word2) == Integer.MAX_VALUE)
+            return "No path";
         LinkedList<String> path = new LinkedList<>();
-        for (String at = word2; at != null; at = prev.get(at)) path.addFirst(at);
+        for (String at = word2; at != null; at = prev.get(at))
+            path.addFirst(at);
         return String.join(" -> ", path) + " (Length: " + dist.get(word2) + ")";
     }
 
     public static String calcShortestPathsFrom(String word1) {
-        if (!graph.nodes.contains(word1)) return "Word not in graph";
+        if (!graph.nodes.contains(word1))
+            return "Word not in graph";
         Map<String, Integer> dist = new HashMap<>();
         Map<String, String> prev = new HashMap<>();
         PriorityQueue<String> pq = new PriorityQueue<>(Comparator.comparingInt(dist::get));
-        for (String node : graph.nodes) dist.put(node, Integer.MAX_VALUE);
-        dist.put(word1, 0); pq.add(word1);
+        for (String node : graph.nodes)
+            dist.put(node, Integer.MAX_VALUE);
+        dist.put(word1, 0);
+        pq.add(word1);
 
         while (!pq.isEmpty()) {
             String u = pq.poll();
-            if (!graph.adj.containsKey(u)) continue;
+            if (!graph.adj.containsKey(u))
+                continue;
             for (Map.Entry<String, Integer> entry : graph.adj.get(u).entrySet()) {
                 String v = entry.getKey();
                 int alt = dist.get(u) + entry.getValue();
@@ -182,12 +197,14 @@ public class Lab1_GraphProcessor {
 
         StringBuilder sb = new StringBuilder();
         for (String target : graph.nodes) {
-            if (target.equals(word1)) continue;
+            if (target.equals(word1))
+                continue;
             if (dist.get(target) == Integer.MAX_VALUE) {
                 sb.append("No path from ").append(word1).append(" to ").append(target).append("\n");
             } else {
                 LinkedList<String> path = new LinkedList<>();
-                for (String at = target; at != null; at = prev.get(at)) path.addFirst(at);
+                for (String at = target; at != null; at = prev.get(at))
+                    path.addFirst(at);
                 sb.append(String.join(" -> ", path)).append(" (Length: ").append(dist.get(target)).append(")\n");
             }
         }
@@ -195,28 +212,48 @@ public class Lab1_GraphProcessor {
     }
 
     public static Double calPageRank(String word) {
-        if (!graph.nodes.contains(word)) return 0.0;
-        double d = 0.85;
-        int N = graph.nodes.size();
-        Map<String, Double> pr = new HashMap<>();
-        for (String node : graph.nodes) pr.put(node, 1.0 / N);
+        if (!graph.nodes.contains(word))
+            return 0.0;
 
-        for (int i = 0; i < 100; i++) {
+        final double d = 0.85;
+        final int maxIterations = 100;
+        final double tolerance = 1e-6;
+        int N = graph.nodes.size();
+
+        Map<String, Double> pr = new HashMap<>();
+        for (String node : graph.nodes) {
+            pr.put(node, 1.0 / N);
+        }
+
+        for (int iter = 0; iter < maxIterations; iter++) {
             Map<String, Double> newPr = new HashMap<>();
-            for (String node : graph.nodes) newPr.put(node, (1 - d) / N);
+            for (String node : graph.nodes) {
+                newPr.put(node, (1 - d) / N);
+            }
+
             for (String u : graph.nodes) {
-                Set<String> Bu = new HashSet<>();
-                for (String v : graph.adj.keySet()) {
-                    if (graph.adj.get(v).containsKey(u)) {
-                        Bu.add(v);
+                Set<String> outNeighbors = graph.adj.getOrDefault(u, Collections.emptyMap()).keySet();
+                int outDegree = outNeighbors.size();
+                if (outDegree == 0) {
+                    double distribute = d * pr.get(u) / N;
+                    for (String node : graph.nodes) {
+                        newPr.put(node, newPr.get(node) + distribute);
+                    }
+                } else {
+                    double distribute = d * pr.get(u) / outDegree;
+                    for (String v : outNeighbors) {
+                        newPr.put(v, newPr.get(v) + distribute);
                     }
                 }
-                for (String v : Bu) {
-                    int Lv = graph.adj.get(v).size();
-                    newPr.put(u, newPr.get(u) + d * pr.get(v) / Lv);
-                }
+            }
+            double diff = 0.0;
+            for (String node : graph.nodes) {
+                diff += Math.abs(newPr.get(node) - pr.get(node));
             }
             pr = newPr;
+            if (diff < tolerance) {
+                break;
+            }
         }
         return pr.getOrDefault(word, 0.0);
     }
@@ -224,15 +261,18 @@ public class Lab1_GraphProcessor {
     public static String randomWalk() {
         List<String> visited = new ArrayList<>();
         String current = graph.nodes.stream().skip(random.nextInt(graph.nodes.size())).findFirst().orElse(null);
-        if (current == null) return "Empty graph";
+        if (current == null)
+            return "Empty graph";
         Set<String> visitedEdges = new HashSet<>();
         while (current != null && graph.adj.containsKey(current)) {
             visited.add(current);
             List<String> neighbors = new ArrayList<>(graph.adj.get(current).keySet());
-            if (neighbors.isEmpty()) break;
+            if (neighbors.isEmpty())
+                break;
             String next = neighbors.get(random.nextInt(neighbors.size()));
             String edge = current + "->" + next;
-            if (visitedEdges.contains(edge)) break;
+            if (visitedEdges.contains(edge))
+                break;
             visitedEdges.add(edge);
             current = next;
         }
