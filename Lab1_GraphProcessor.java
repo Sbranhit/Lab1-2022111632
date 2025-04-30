@@ -16,6 +16,7 @@ public class Lab1_GraphProcessor {
 
     static Graph graph = new Graph();
     static Random random = new Random();
+    static Map<String, Integer> wordFreq = new HashMap<>();  // 添加全局词频表
 
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
@@ -71,23 +72,50 @@ public class Lab1_GraphProcessor {
         List<String> words = new ArrayList<>();
         while ((line = reader.readLine()) != null) {
             line = line.replaceAll("[^a-zA-Z]", " ").toLowerCase();
-            words.addAll(Arrays.asList(line.split("\\s+")));
+            String[] tokens = line.split("\\s+");
+            for (String word : tokens) {
+                if (!word.isEmpty()) {
+                    words.add(word);
+                    wordFreq.put(word, wordFreq.getOrDefault(word, 0) + 1);  // 记录词频
+                }
+            }
         }
         reader.close();
         for (int i = 0; i < words.size() - 1; i++) {
-            if (!words.get(i).isEmpty() && !words.get(i + 1).isEmpty()) {
-                graph.addEdge(words.get(i), words.get(i + 1));
-            }
+            graph.addEdge(words.get(i), words.get(i + 1));
         }
     }
 
     public static void showDirectedGraph(Graph G) {
-        for (String from : G.adj.keySet()) {
-            for (Map.Entry<String, Integer> entry : G.adj.get(from).entrySet()) {
-                System.out.printf("%s -> %s [weight=%d]\n", from, entry.getKey(), entry.getValue());
+        // 1. 写出 .dot 文件
+        try (PrintWriter writer = new PrintWriter("graph.dot")) {
+            writer.println("digraph G {");
+            writer.println("    rankdir=LR;"); // 从左到右画图
+            for (String from : G.adj.keySet()) {
+                for (Map.Entry<String, Integer> entry : G.adj.get(from).entrySet()) {
+                    writer.printf("    \"%s\" -> \"%s\" [label=\"%d\"];\n",
+                            from, entry.getKey(), entry.getValue());
+                }
             }
+            writer.println("}");
+            System.out.println("图文件已生成为 graph.dot");
+        } catch (IOException e) {
+            System.out.println("生成 .dot 文件失败：" + e.getMessage());
+            return;
+        }
+    
+        // 2. 调用 dot 命令生成图像
+        try {
+            ProcessBuilder pb = new ProcessBuilder("dot", "-Tpng", "graph.dot", "-o", "graph.png");
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            process.waitFor();
+            System.out.println("图像文件已生成为 graph.png");
+        } catch (Exception e) {
+            System.out.println("自动调用 Graphviz 失败，请手动执行：dot -Tpng graph.dot -o graph.png");
         }
     }
+    
 
     public static String queryBridgeWords(String word1, String word2) {
         boolean hasW1 = graph.nodes.contains(word1);
@@ -221,8 +249,10 @@ public class Lab1_GraphProcessor {
         int N = graph.nodes.size();
 
         Map<String, Double> pr = new HashMap<>();
+        double total = wordFreq.values().stream().mapToDouble(i -> i).sum();
         for (String node : graph.nodes) {
-            pr.put(node, 1.0 / N);
+            double freq = wordFreq.getOrDefault(node, 1);
+            pr.put(node, freq / total);  // 以词频占比作为初始 PR 值
         }
 
         for (int iter = 0; iter < maxIterations; iter++) {
